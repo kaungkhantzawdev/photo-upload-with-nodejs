@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
     res.json({ msg: 'I am testing'})
 })
 
-//file
+//single file upload
 app.post('/upload', (req, res, next) => {
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -36,6 +36,35 @@ app.post('/upload', (req, res, next) => {
         }
       })
 })
+
+//multiple upload file
+app.post('/upload-multiple', (req, res, next) => {
+    const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+          cb(null, './uploads/multiple')
+        },
+        filename: function (req, file, cb) {
+          const temp_file_arr = file.originalname.split('.')
+          const temp_filename = temp_file_arr[0]
+          const temp_file_extension = temp_file_arr[1]
+    
+          const uniqueSuffix = Date.now() + '.' + temp_file_extension
+          cb(null, file.fieldname + '-' + uniqueSuffix)
+        }
+      })
+    
+      const upload = multer({ storage: storage }).fields([
+        { name: 'gallery', maxCount: 8 }
+      ]) 
+      upload(req, res, function (err){
+        if(err){
+            res.json({msg: 'error uploading', err: err})
+        }else{
+            res.json({msg: 'success uploading'})
+        }
+      })
+})
+
 
 app.listen(3000, () => {
     console.log('listening on port 3000');
